@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import pandas as pd
-from skimage import draw
 
 from PIL import Image
 import xml.etree.ElementTree as et
@@ -54,6 +53,6 @@ for set in sets:
 out_df = pd.DataFrame(rows, columns=df_cols)
 
 out_df = out_df.dropna()
-out_df = out_df[out_df.mask_label == 'Mouth1']
+out_df = out_df[(out_df.mask_label == 'Mouth1') | (out_df.mask_label == 'Mouth')]
 
 out_df.to_csv("../data/opmd_dataset.csv", index=False)
