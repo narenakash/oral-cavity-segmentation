@@ -1,72 +1,62 @@
 import os
 import numpy as np
 import pandas as pd
-from PIL import Image
-import xml.etree.ElementTree as et
+
+from ast import literal_eval
+from PIL import Image, ImageDraw
 
 
-data_dir = '/ssd_scratch/cvit/chocolite/PolygonSets/'
-sets = [1, 5]
+if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD/"): 
+    os.makedirs("/ssd_scratch/cvit/chocolite/OPMD/")
 
-if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMDDataset"): 
-    os.makedirs("/ssd_scratch/cvit/chocolite/OPMDDataset")
+if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD/images/"): 
+    os.makedirs("/ssd_scratch/cvit/chocolite/OPMD/images/")
 
-# STEP ONE: GENERATE CSV
+if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD/masks/"): 
+    os.makedirs("/ssd_scratch/cvit/chocolite/OPMD/masks/")
 
-df_cols = ['img_name', 'img_height', 'img_width', 'mask_label', 'mask_points']
-rows = []
-
-for set in sets:
-
-    file = f'Set{set}/Set{set}_MouthAnnotations.xml'
-
-    xtree = et.parse(data_dir + file)
-    xroot = xtree.getroot()
-
-    for node in xroot:
-        img_name = node.attrib.get("name")
-        img_height = node.attrib.get("height") if node is not None else None
-        img_width = node.attrib.get("width") if node is not None else None
-
-        if node.find("polygon") is not None:
-            mask_label = node.find("polygon").attrib.get("label") if node is not None else None
-            mask_points = node.find("polygon").attrib.get("points") if node is not None else None
-        else:
-            mask_label = None
-            mask_points = None
-
-        rows.append({"img_name": data_dir + f'Set{set}/Originals/' + str(img_name), "img_height": img_height, "img_width": img_width, "mask_label": mask_label, "mask_points": mask_points})
-
-out_df = pd.DataFrame(rows, columns=df_cols)
-
-out_df = out_df.dropna()
-out_df = out_df[out_df.mask_label == 'Mouth1']
-
-# out_df.to_csv("/ssd_scratch/cvit/chocolite/OPMDDataset/opmd_dataset.csv", index=False)
-out_df.to_csv("./opmd_dataset.csv", index=False)
+if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD/masked_images/"): 
+    os.makedirs("/ssd_scratch/cvit/chocolite/OPMD/masked_images/")
 
 
+df_csv = pd.read_csv("../data/opmd_dataset.csv")
 
 # STEP TWO: GENERATE DATASET
 
-def rle2mask(mask_rle, shape):
-    s = mask_rle.split(',')
-    starts, lengths = [np.asarray(x, dtype=float32) for x in (s[0:][::2], s[1:][::2])]
-    starts -= 1
-    ends = starts + lengths
-    img = np.zeros(shape[0] * shape[1], dtype=np.uint8)
-    for lo, hi in zip(starts, ends):
-        img[lo:hi] = 255
-    return img.reshape(shape).T
+def points2mask(points, shape):
 
+    points = literal_eval(points)
 
-for index, row in out_df.iterrows():
-    image = Image.open(row['img_name'])
-    image = np.array(image)
-    mask = rle2mask(row['mask_points'], (int(row['img_height']), int(row['img_width'])))
+    # round the points to the nearest integer
+    points = np.round(points).astype(int)
+    points = [tuple(x) for x in points]
+
+    mask = np.zeros(shape, dtype=np.uint8)
+    mask = Image.fromarray(mask)
+
+    ImageDraw.Draw(mask).polygon(points, outline=1, fill=255)
     mask = np.array(mask)
 
-    image = Image.fromarray(image)
-    image.save(f"/ssd_scratch/cvit/chocolite/OPMDDataset/{row['img_name'].split('/')[-1]}")
+    return mask
+
+
+for index, row in df_csv.iterrows():
+
+    print(f"Processing image {index + 1} of {len(df_csv)}")
+    
+    image = Image.open(row['img_dir_path'] + row['img_name'])
+
+    mask = points2mask(row['polygon_points'], (int(row['img_height']), int(row['img_width'])))
     mask = Image.fromarray(mask)
-    mask.save(f"/ssd_scratch/cvit/chocolite/OPMDDataset/{row['img_name'].split('/')[-1].split('.')[0]}_mask.png")
+
+    # resize image and mask to 512 x 512
+    image = image.resize((512, 512), resample=Image.Resampling.BICUBIC)
+    mask = mask.resize((512, 512), resample=Image.Resampling.BICUBIC)
+
+    # from image and mask, generate colour masked image
+    masked_image = Image.new("RGB", (512, 512))
+    masked_image.paste(image, mask=mask)
+
+    image.save(f"/ssd_scratch/cvit/chocolite/OPMD/images/{row['img_name'].split('.')[0]}.png")
+    mask.save(f"/ssd_scratch/cvit/chocolite/OPMD/masks/{row['img_name'].split('.')[0]}_mask.png")
+    masked_image.save(f"/ssd_scratch/cvit/chocolite/OPMD/masked_images/{row['img_name'].split('.')[0]}_masked.png")
