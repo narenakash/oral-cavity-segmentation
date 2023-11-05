@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pandas as pd
 
 from PIL import Image
 
@@ -9,22 +10,28 @@ from torch.utils.data import Dataset
 
 class OPMDDataset(Dataset):
 
-    def __init__(self, image_dir, mask_dir, transform=None):
+    def __init__(self, data_csv_path="data/opmd_dataset.csv", 
+                image_dir="/ssd_scratch/cvit/chocolite/OPMD/images/", 
+                mask_dir="/ssd_scratch/cvit/chocolite/OPMD/masks/", mode="train", transform=None):
+        
         self.image_dir = image_dir
         self.mask_dir = mask_dir
+        self.data_csv = pd.read_csv(data_csv_path)
+
+        self.mode = mode   
         self.transform = transform
 
-        self.images = os.listdir(image_dir)
-
     def __len__(self):
-        return len(self.images)
+        return self.data_csv.shape[0]
 
     def __getitem__(self, index):
-        img_path = os.path.join(self.image_dir, self.images[index])
-        mask_path = os.path.join(self.mask_dir, self.images[index].replace(".jpg", "_mask.png"))
+        row = self.data_csv.iloc[index]
 
-        image = np.array(Image.open(img_path).convert("RGB"))
-        mask = np.array(Image.open(mask_path).convert("L"), dtype=np.float32)
+        image = Image.open(os.path.join(self.image_dir, f"{row['img_name'].split('.')[0]}.png"))
+        mask = Image.open(os.path.join(self.mask_dir, f"{row['img_name'].split('.')[0]}_mask.png"))
+
+        image = np.array(image.convert("RGB"))
+        mask = np.array(mask.convert("L"), dtype=np.float32)
 
         mask[mask == 255.0] = 1.0
 
