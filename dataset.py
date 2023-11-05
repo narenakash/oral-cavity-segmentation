@@ -5,6 +5,7 @@ import pandas as pd
 from PIL import Image
 
 import torch
+from torchvision import transforms
 from torch.utils.data import Dataset
 
 
@@ -40,7 +41,7 @@ class OPMDDataset(Dataset):
             image = augmentations["image"]
             mask = augmentations["mask"]
 
-        image = torch.from_numpy(image)
-        mask = torch.from_numpy(mask)
+        image = transforms.ToTensor()(image)
+        mask = transforms.ToTensor()(mask)
         
         return image, mask
