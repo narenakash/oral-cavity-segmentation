@@ -39,5 +39,8 @@ class OPMDDataset(Dataset):
             augmentations = self.transform(image=image, mask=mask)
             image = augmentations["image"]
             mask = augmentations["mask"]
+
+        image = torch.from_numpy(image)
+        mask = torch.from_numpy(mask)
         
         return image, mask
