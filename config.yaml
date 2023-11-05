@@ -1,0 +1,32 @@
+project_name: 'opmd-oralcavity-segmentation'
+
+# dataset details
+dataset:
+  train_csv_path: 'data/opmd_dataset.csv'
+  train_img_dir: '/ssd_scratch/cvit/chocolite/OPMD/images/'
+  train_mask_dir: '/ssd_scratch/cvit/chocolite/OPMD/masks/'
+
+  val_csv_path: 'data/opmd_dataset.csv'
+  val_img_dir: '/ssd_scratch/cvit/chocolite/OPMD/images/'
+  val_mask_dir: '/ssd_scratch/cvit/chocolite/OPMD/masks/'
+
+  test_csv_path: 'data/opmd_dataset.csv'
+  test_img_dir: '/ssd_scratch/cvit/chocolite/OPMD/images/'
+  test_mask_dir: '/ssd_scratch/cvit/chocolite/OPMD/masks/'
+
+seed: 42
+
+# training details
+init_lr: 1e-3
+n_epochs: 2
+batch_size: 4
+num_workers: 20
+
+# saving checkpoints
+save_dir: '/ssd_scratch/cvit/chocolite/OPMD/weights/'
+save_freq: 1
+
+# model details
+model:
+  n_channels: 3
+  n_classes: 1
