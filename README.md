@@ -1,0 +1,1 @@
+# Oral Cavity Segmentation using Deep Learning Approach for Oral Potential Malignancy Disorder Screening at Population Scale
