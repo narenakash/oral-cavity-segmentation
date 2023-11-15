@@ -16,3 +16,21 @@ def set_seed(seed=42):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+
+
+# write save_checkpoint and load_checkpoint functions here
+def save_checkpoint(model, optimizer, save_dir, epoch):
+    checkpoint = {
+        "epoch": epoch,
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+    }
+    torch.save(checkpoint, f"{save_dir}/model_{epoch}.pth")
+
+
+def load_checkpoint(model, optimizer, load_path, device):
+    checkpoint = torch.load(load_path, map_location=device)
+    model.load_state_dict(checkpoint["model_state_dict"])
+    optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+    epoch = checkpoint["epoch"]
+    return model, optimizer, epoch
