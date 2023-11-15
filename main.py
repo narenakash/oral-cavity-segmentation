@@ -50,7 +50,7 @@ def main():
 
 
     # train, eval and test
-    train(model=model, train_loader=train_loader, val_loader=val_loader, optimizer=optimizer, criterion=criterion, save_dir=config["save_dir"], n_epochs=config["n_epochs"], save_freq=config["save_freq"], device=device)
+    train(model=model, train_loader=train_loader, val_loader=val_loader, test_loader=test_loader, optimizer=optimizer, criterion=criterion, save_dir=config["save_dir"], n_epochs=config["n_epochs"], save_freq=config["save_freq"], device=device)
     
     # load_best_checkpoint
     # test(test_loader=test_loader, model, criterion, device=device)

@@ -40,4 +40,4 @@ def test(loader, model, criterion, device):
 
     print(f"test_loss: {loss:.4f}, test_dice_score: {dice_score:.4f}")
 
-    return loss, dice_metric
+    return loss, dice_score

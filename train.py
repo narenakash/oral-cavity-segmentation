@@ -7,10 +7,11 @@ from tqdm import tqdm
 from monai.metrics import DiceMetric
 from monai.transforms import Activations, AsDiscrete, Compose
 
+from test import test
 from utils import load_checkpoint, save_checkpoint
 
 
-def train(model, train_loader, val_loader, optimizer, criterion, save_dir, device, n_epochs=10, save_freq=1, n_gpus=4):
+def train(model, train_loader, val_loader, test_loader, optimizer, criterion, save_dir, device, n_epochs=10, save_freq=1, n_gpus=4):
 
     best_val_dsc = -1
     best_val_dsc_epoch = -1
@@ -26,11 +27,14 @@ def train(model, train_loader, val_loader, optimizer, criterion, save_dir, devic
             best_val_dsc = val_dsc
             best_val_dsc_epoch = epoch + 1
 
-        #     save_checkpoint(model, optimizer, save_dir, epoch+1)
-        #     print(f"New best DSC metric checkpoint saved at {save_dir}")
+            save_checkpoint(model, optimizer, save_dir, epoch+1)
+            print(f"New best DSC metric checkpoint saved at {save_dir}model_{epoch+1}.pth")
 
         print("Current epoch: {} current mean val dice: {:.4f} best mean val dice: {:.4f} at epoch {}".format(
                         epoch + 1, val_dsc, best_val_dsc, best_val_dsc_epoch))
+        
+        test_loss, test_dsc = test(test_loader, model, criterion, device)
+        print("Current mean test dice: {:.4f}".format(epoch + 1, test_dsc))
         
         # save_checkpoint function
         # if epoch % save_freq == 0:
@@ -41,6 +45,12 @@ def train(model, train_loader, val_loader, optimizer, criterion, save_dir, devic
         #     torch.save(model.module.state_dict(), f"{save_dir}/model_{epoch}.pth")
         # else:
         #     torch.save(model.state_dict(), f"{save_dir}/model_{epoch}.pth")
+
+    # load best checkpoint
+    model, optimizer, start_epoch = load_checkpoint(model, optimizer, f"{save_dir}/model_{best_val_dsc_epoch}.pth", device)
+    print(f"Loaded best checkpoint from epoch {best_val_dsc_epoch}")
+
+    test(loader=test_loader, model=model, criterion=criterion, device=device)
 
 
 def train_epoch(loader, model, optimizer, criterion, device):
