@@ -30,7 +30,7 @@ def main():
     # dataset
     train_dataset = OPMDDataset(data_csv_path=config["dataset"]["train_csv_path"], image_dir=config["dataset"]["train_img_dir"], 
                                 mask_dir=config["dataset"]["train_mask_dir"], mode="train", transform=None)
-    train_loader = DataLoader(train_dataset, batch_size=config["batch_size"], shuffle=False, num_workers=config["num_workers"])
+    train_loader = DataLoader(train_dataset, batch_size=config["batch_size"], shuffle=True, num_workers=config["num_workers"])
 
     val_dataset = OPMDDataset(data_csv_path=config["dataset"]["val_csv_path"], image_dir=config["dataset"]["val_img_dir"],
                                 mask_dir=config["dataset"]["val_mask_dir"], mode="val", transform=None)

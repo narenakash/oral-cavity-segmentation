@@ -17,8 +17,8 @@ dataset:
 seed: 42
 
 # training details
-init_lr: 1e-3
-n_epochs: 2
+init_lr: 1e-4
+n_epochs: 1
 batch_size: 4
 num_workers: 20
 

@@ -34,7 +34,7 @@ class OPMDDataset(Dataset):
         image = np.array(image.convert("RGB"))
         mask = np.array(mask.convert("L"), dtype=np.float32)
 
-        mask[mask == 255.0] = 1.0
+        mask[mask != 0.0] = 1.0
 
         if self.transform is not None:
             augmentations = self.transform(image=image, mask=mask)
