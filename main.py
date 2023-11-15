@@ -1,3 +1,4 @@
+import os
 import wandb
 
 import torch
@@ -29,7 +30,7 @@ def main():
     # dataset
     train_dataset = OPMDDataset(data_csv_path=config["dataset"]["train_csv_path"], image_dir=config["dataset"]["train_img_dir"], 
                                 mask_dir=config["dataset"]["train_mask_dir"], mode="train", transform=None)
-    train_loader = DataLoader(train_dataset, batch_size=config["batch_size"], shuffle=True, num_workers=config["num_workers"])
+    train_loader = DataLoader(train_dataset, batch_size=config["batch_size"], shuffle=False, num_workers=config["num_workers"])
 
     val_dataset = OPMDDataset(data_csv_path=config["dataset"]["val_csv_path"], image_dir=config["dataset"]["val_img_dir"],
                                 mask_dir=config["dataset"]["val_mask_dir"], mode="val", transform=None)
@@ -44,14 +45,15 @@ def main():
     model = nn.DataParallel(model)
 
     # loss and optimizer
-    criterion = DiceCELoss()
+    criterion = DiceCELoss(sigmoid=True)
     optimizer = optim.Adam(model.parameters(), lr=config["init_lr"])
 
 
     # train, eval and test
     train(model=model, train_loader=train_loader, val_loader=val_loader, optimizer=optimizer, criterion=criterion, save_dir=config["save_dir"], n_epochs=config["n_epochs"], save_freq=config["save_freq"], device=device)
     
-    # test(test_loader, model, criterion)
+    # load_best_checkpoint
+    # test(test_loader=test_loader, model, criterion, device=device)
 
 
     
@@ -66,6 +68,9 @@ if __name__ == "__main__":
     )
 
     wandb.config.update(config)
+
+    if not os.path.exists(config["save_dir"]):
+        os.makedirs(config["save_dir"])
 
     main()
 

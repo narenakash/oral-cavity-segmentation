@@ -5,35 +5,31 @@ import wandb
 from tqdm import tqdm
 
 from monai.metrics import DiceMetric
+from monai.transforms import Activations, AsDiscrete, Compose
 
-from utils import (
-    load_checkpoint,
-    save_checkpoint,
-)
+from utils import load_checkpoint, save_checkpoint
 
 
 def train(model, train_loader, val_loader, optimizer, criterion, save_dir, device, n_epochs=10, save_freq=1, n_gpus=4):
 
     best_val_dsc = -1
     best_val_dsc_epoch = -1
-
-    dice_metric = DiceMetric(include_background=True, reduction="mean")
     
     for epoch in range(n_epochs):
 
         # train_epoch and eval_epoch functions
-        train_loss, train_dsc = train_epoch(train_loader, model, optimizer, criterion, dice_metric, device)
+        train_loss, train_dsc = train_epoch(train_loader, model, optimizer, criterion, device)
 
-        val_loss, val_dsc = eval_epoch(val_loader, model, criterion, dice_metric, device)
+        val_loss, val_dsc = eval_epoch(val_loader, model, criterion, device)
 
         if val_dsc > best_val_dsc:
             best_val_dsc = val_dsc
             best_val_dsc_epoch = epoch + 1
 
-            save_checkpoint(model, optimizer, save_dir, epoch+1)
-            print(f"New best DSC metric checkpoint saved at {save_dir}")
+        #     save_checkpoint(model, optimizer, save_dir, epoch+1)
+        #     print(f"New best DSC metric checkpoint saved at {save_dir}")
 
-        print("Current epoch: {} current mean dice: {:.4f} best mean dice: {:.4f} at epoch {}".format(
+        print("Current epoch: {} current mean val dice: {:.4f} best mean val dice: {:.4f} at epoch {}".format(
                         epoch + 1, val_dsc, best_val_dsc, best_val_dsc_epoch))
         
         # save_checkpoint function
@@ -47,8 +43,11 @@ def train(model, train_loader, val_loader, optimizer, criterion, save_dir, devic
         #     torch.save(model.state_dict(), f"{save_dir}/model_{epoch}.pth")
 
 
-def train_epoch(loader, model, optimizer, criterion, dice_metric, device):
+def train_epoch(loader, model, optimizer, criterion, device):
     model.train()
+
+    dice_metric = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
+    post_transform = Compose([Activations(sigmoid=True), AsDiscrete(threshold=0.5)])
 
     losses = []
     
@@ -64,12 +63,13 @@ def train_epoch(loader, model, optimizer, criterion, dice_metric, device):
         loss.backward()
         optimizer.step()
 
-        print(f"{batch_idx}/{len(loader)}, train_loss: {loss.item():.4f}")
+        # print(f"{batch_idx}/{len(loader)}, train_loss: {loss.item():.4f}")
         losses.append(loss.item())
 
+        masks_pred = post_transform(masks_pred)
         dice_metric(y_pred=masks_pred, y=masks)
     
-    dice_score = dice_score.aggregate().item()
+    dice_score = dice_metric.aggregate().item()
     dice_metric.reset()
 
     loss = sum(losses) / len(losses)
@@ -77,11 +77,14 @@ def train_epoch(loader, model, optimizer, criterion, dice_metric, device):
 
     print(f"train_loss: {loss:.4f}, train_dice_score: {dice_score:.4f}")
 
-    return loss, dice_metric
+    return loss, dice_score
 
 
-def eval_epoch(loader, model, criterion, dice_metric, device):
+def eval_epoch(loader, model, criterion, device):
     model.eval()
+
+    dice_metric = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
+    post_transform = Compose([Activations(sigmoid=True), AsDiscrete(threshold=0.5)])
 
     losses = []
 
@@ -96,9 +99,10 @@ def eval_epoch(loader, model, criterion, dice_metric, device):
 
             losses.append(loss.item())
 
+            masks_pred = post_transform(masks_pred)
             dice_metric(y_pred=masks_pred, y=masks)
 
-    dice_score = dice_score.aggregate().item()
+    dice_score = dice_metric.aggregate().item()
     dice_metric.reset()
 
     loss = sum(losses) / len(losses)
@@ -106,4 +110,4 @@ def eval_epoch(loader, model, criterion, dice_metric, device):
 
     print(f"val_loss: {loss:.4f}, val_dice_score: {dice_score:.4f}")
 
-    return loss, dice_metric
+    return loss, dice_score
