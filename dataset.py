@@ -31,7 +31,7 @@ class OPMDDataset(Dataset):
         image = Image.open(os.path.join(self.image_dir, f"{row['img_name'].split('.')[0]}.png"))
         mask = Image.open(os.path.join(self.mask_dir, f"{row['img_name'].split('.')[0]}_mask.png"))
 
-        image = np.array(image.convert("RGB"))
+        image = np.array(image.convert("L"), dtype=np.float32)
         mask = np.array(mask.convert("L"), dtype=np.float32)
 
         mask[mask != 0.0] = 1.0

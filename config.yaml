@@ -29,5 +29,5 @@ save_freq: 1
 # model details
 model:
   name: 'unet'
-  n_channels: 3
+  n_channels: 1
   n_classes: 1
