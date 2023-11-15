@@ -1,5 +1,6 @@
 import os
 import wandb
+from datetime import datetime
 
 import torch
 from torch import nn
@@ -20,7 +21,7 @@ config = get_config("config.yaml")
 
 
 
-def main():
+def main(run_name):
 
     set_seed(config["seed"])
 
@@ -48,9 +49,10 @@ def main():
     criterion = DiceCELoss(sigmoid=True)
     optimizer = optim.Adam(model.parameters(), lr=config["init_lr"])
 
+    save_dir = os.path.join(config["save_dir"], run_name)
 
     # train, eval and test
-    train(model=model, train_loader=train_loader, val_loader=val_loader, test_loader=test_loader, optimizer=optimizer, criterion=criterion, save_dir=config["save_dir"], n_epochs=config["n_epochs"], save_freq=config["save_freq"], device=device)
+    train(model=model, train_loader=train_loader, val_loader=val_loader, test_loader=test_loader, optimizer=optimizer, criterion=criterion, save_dir=save_dir, n_epochs=config["n_epochs"], save_freq=config["save_freq"], device=device)
     
     # load_best_checkpoint
     # test(test_loader=test_loader, model, criterion, device=device)
@@ -61,10 +63,15 @@ if __name__ == "__main__":
     
     project_name = config["project_name"]
 
+    run_name = f"{config['model']['name']}_lr_{config['init_lr']}_bs_{config['batch_size']}_epochs_{config['n_epochs']}"
+    run_name = run_name + "_" + datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+
     wandb.init(
         project=project_name,
         config=config,
-        mode="disabled"    
+        entity="chocolite",
+        name=run_name,
+        # mode="disabled"    
     )
 
     wandb.config.update(config)
@@ -72,6 +79,9 @@ if __name__ == "__main__":
     if not os.path.exists(config["save_dir"]):
         os.makedirs(config["save_dir"])
 
-    main()
+    save_dir = os.path.join(config["save_dir"], run_name)
+    os.makedirs(save_dir)
+
+    main(run_name=run_name)
 
     wandb.finish()
