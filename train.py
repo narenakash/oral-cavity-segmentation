@@ -35,6 +35,9 @@ def train(model, train_loader, val_loader, test_loader, optimizer, criterion, sa
         
         test_loss, test_dsc = test(test_loader, model, criterion, device)
         print("Current mean test dice: {:.4f}".format(epoch + 1, test_dsc))
+
+        # log wandb
+        wandb.log({"train_loss": train_loss, "train_dice_score": train_dsc, "val_loss": val_loss, "val_dice_score": val_dsc, "test_loss": test_loss, "test_dice_score": test_dsc, "epoch": epoch+1, "best_val_dice_score": best_val_dsc, "best_val_dice_score_epoch": best_val_dsc_epoch})
         
         # save_checkpoint function
         # if epoch % save_freq == 0:
@@ -83,7 +86,7 @@ def train_epoch(loader, model, optimizer, criterion, device):
     dice_metric.reset()
 
     loss = sum(losses) / len(losses)
-    wandb.log({"train_loss": loss, "train_dice_score": dice_score})
+    # wandb.log({"train_loss": loss, "train_dice_score": dice_score})
 
     print(f"train_loss: {loss:.4f}, train_dice_score: {dice_score:.4f}")
 
@@ -116,7 +119,7 @@ def eval_epoch(loader, model, criterion, device):
     dice_metric.reset()
 
     loss = sum(losses) / len(losses)
-    wandb.log({"val_loss": loss, "val_dice_score": dice_score})
+    # wandb.log({"val_loss": loss, "val_dice_score": dice_score})
 
     print(f"val_loss: {loss:.4f}, val_dice_score: {dice_score:.4f}")
 

@@ -36,7 +36,7 @@ def test(loader, model, criterion, device):
     dice_metric.reset()
 
     loss = sum(losses) / len(losses)
-    wandb.log({"test_loss": loss, "test_dice_score": dice_score})
+    # wandb.log({"test_loss": loss, "test_dice_score": dice_score})
 
     print(f"test_loss: {loss:.4f}, test_dice_score: {dice_score:.4f}")
 
