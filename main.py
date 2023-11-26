@@ -29,13 +29,13 @@ def main(run_name):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # dataset
-    train_dataset = OPMDDataset(data_csv_path=config["dataset"]["train_csv_path"].replace("x", config["fold"]), image_dir=config["dataset"]["train_img_dir"], mask_dir=config["dataset"]["train_mask_dir"], mode="train", transform=None)
+    train_dataset = OPMDDataset(data_csv_path=config["dataset"]["train_csv_path"].replace("x", str(config["fold"])), image_dir=config["dataset"]["train_img_dir"], mask_dir=config["dataset"]["train_mask_dir"], mode="train", transform=None, n_channels=config["model"]["n_channels"])
     train_loader = DataLoader(train_dataset, batch_size=config["batch_size"], shuffle=True, num_workers=config["num_workers"])
 
-    val_dataset = OPMDDataset(data_csv_path=config["dataset"]["val_csv_path"].replace("x", config["fold"]), image_dir=config["dataset"]["val_img_dir"], mask_dir=config["dataset"]["val_mask_dir"], mode="val", transform=None)
+    val_dataset = OPMDDataset(data_csv_path=config["dataset"]["val_csv_path"].replace("x", str(config["fold"])), image_dir=config["dataset"]["val_img_dir"], mask_dir=config["dataset"]["val_mask_dir"], mode="val", transform=None)
     val_loader = DataLoader(val_dataset, batch_size=config["batch_size"], shuffle=False, num_workers=config["num_workers"])
 
-    test_dataset = OPMDDataset(data_csv_path=config["dataset"]["test_csv_path"].replace("x", config["fold"]), image_dir=config["dataset"]["test_img_dir"], mask_dir=config["dataset"]["test_mask_dir"], mode="test", transform=None)
+    test_dataset = OPMDDataset(data_csv_path=config["dataset"]["test_csv_path"].replace("x", str(config["fold"])), image_dir=config["dataset"]["test_img_dir"], mask_dir=config["dataset"]["test_mask_dir"], mode="test", transform=None)
     test_loader = DataLoader(test_dataset, batch_size=config["batch_size"], shuffle=False, num_workers=config["num_workers"])
 
     # model
