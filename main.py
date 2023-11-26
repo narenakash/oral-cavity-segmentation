@@ -29,16 +29,13 @@ def main(run_name):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # dataset
-    train_dataset = OPMDDataset(data_csv_path=config["dataset"]["train_csv_path"], image_dir=config["dataset"]["train_img_dir"], 
-                                mask_dir=config["dataset"]["train_mask_dir"], mode="train", transform=None)
+    train_dataset = OPMDDataset(data_csv_path=config["dataset"]["train_csv_path"].replace("x", config["fold"]), image_dir=config["dataset"]["train_img_dir"], mask_dir=config["dataset"]["train_mask_dir"], mode="train", transform=None)
     train_loader = DataLoader(train_dataset, batch_size=config["batch_size"], shuffle=True, num_workers=config["num_workers"])
 
-    val_dataset = OPMDDataset(data_csv_path=config["dataset"]["val_csv_path"], image_dir=config["dataset"]["val_img_dir"],
-                                mask_dir=config["dataset"]["val_mask_dir"], mode="val", transform=None)
+    val_dataset = OPMDDataset(data_csv_path=config["dataset"]["val_csv_path"].replace("x", config["fold"]), image_dir=config["dataset"]["val_img_dir"], mask_dir=config["dataset"]["val_mask_dir"], mode="val", transform=None)
     val_loader = DataLoader(val_dataset, batch_size=config["batch_size"], shuffle=False, num_workers=config["num_workers"])
 
-    test_dataset = OPMDDataset(data_csv_path=config["dataset"]["test_csv_path"], image_dir=config["dataset"]["test_img_dir"],
-                                mask_dir=config["dataset"]["test_mask_dir"], mode="test", transform=None)
+    test_dataset = OPMDDataset(data_csv_path=config["dataset"]["test_csv_path"].replace("x", config["fold"]), image_dir=config["dataset"]["test_img_dir"], mask_dir=config["dataset"]["test_mask_dir"], mode="test", transform=None)
     test_loader = DataLoader(test_dataset, batch_size=config["batch_size"], shuffle=False, num_workers=config["num_workers"])
 
     # model
@@ -63,7 +60,7 @@ if __name__ == "__main__":
     
     project_name = config["project_name"]
 
-    run_name = f"{config['model']['name']}_lr_{config['init_lr']}_bs_{config['batch_size']}_epochs_{config['n_epochs']}"
+    run_name = f"{config['model']['name']}_fold_{config['fold']}_lr_{config['init_lr']}_bs_{config['batch_size']}_epochs_{config['n_epochs']}"
     run_name = run_name + "_" + datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 
     wandb.init(
