@@ -7,16 +7,17 @@ import xml.etree.ElementTree as et
 
 
 data_dir = '/ssd_scratch/cvit/chocolite/OPMDData/'
-sets = [5, 6]
+sets = [5, 6, 11]
+setdates = ['20231031', '20231031', '20231125']
 
 # STEP ONE: GENERATE CSV
 
 df_cols = ['img_dir_path', 'img_name', 'img_height', 'img_width', 'mask_label', 'polygon_points']
 rows = []
 
-for set in sets:
+for index, set in enumerate(sets):
 
-    file = f'Set{set}_20231031_onlyMouth.xml'
+    file = f'Set{set}_{setdates[index]}_onlyMouth.xml'
 
     xtree = et.parse(data_dir + file)
     xroot = xtree.getroot()
