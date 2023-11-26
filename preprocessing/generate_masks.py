@@ -44,7 +44,7 @@ for index, row in df_csv.iterrows():
 
     print(f"Processing image {index + 1} of {len(df_csv)}")
     
-    image = Image.open(row['img_dir_path'] + row['img_name'])
+    image = Image.open(row['img_dir_path'] + "Originals/" + row['img_name'])
 
     mask = points2mask(row['polygon_points'], (int(row['img_height']), int(row['img_width'])))
     mask = Image.fromarray(mask)
