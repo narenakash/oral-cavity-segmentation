@@ -19,7 +19,8 @@ if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD/masked_images/"):
     os.makedirs("/ssd_scratch/cvit/chocolite/OPMD/masked_images/")
 
 
-df_csv = pd.read_csv("../data/opmd_dataset.csv")
+df_csv = pd.read_csv("../data/opmd_dataset.csv")[439:]
+
 
 # STEP TWO: GENERATE DATASET
 

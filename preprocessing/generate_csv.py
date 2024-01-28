@@ -7,8 +7,10 @@ import xml.etree.ElementTree as et
 
 
 data_dir = '/ssd_scratch/cvit/chocolite/OPMDData/'
-sets = [5, 6, 11]
-setdates = ['20231031', '20231031', '20231125']
+# sets = [5, 6, 11, 12]
+# setdates = ['20231031', '20231031', '20231125', '20231201']
+sets = [12]
+setdates = ['20231201']
 
 # STEP ONE: GENERATE CSV
 
@@ -56,4 +58,4 @@ out_df = pd.DataFrame(rows, columns=df_cols)
 out_df = out_df.dropna()
 out_df = out_df[(out_df.mask_label == 'Mouth1') | (out_df.mask_label == 'Mouth')]
 
-out_df.to_csv("../data/opmd_dataset.csv", index=False)
+out_df.to_csv("../data/opmd_dataset.csv", mode='a', index=False)

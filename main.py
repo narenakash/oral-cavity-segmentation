@@ -6,7 +6,8 @@ import torch
 from torch import nn
 from torch import optim
 from torch.utils.data import DataLoader
-from torchvision.transforms import ToTensor, Compose, RandRotate, RandFlip
+
+import albumentations as A
 
 from models.unet import UNet
 # from losses import DiceCELoss
@@ -29,19 +30,17 @@ def main(run_name):
     # device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    if config['data_aug'] is True:
-        train_transforms = Compose([
-            RandRotate(range_x=15, prob=0.5, keep_size=True),
-            RandFlip(spatial_axis=0, prob=0.5),
-            RandFlip(spatial_axis=1, prob=0.5),
-            ToTensor()
+    if config['data_aug'] == 1:
+        print("Data Augmentation is applied")
+        train_transforms = A.Compose([
+            A.Rotate(limit=90),
+            A.HorizontalFlip(p=0.5),
+            A.VerticalFlip(p=0.5),
         ])
-        val_transforms = Compose([ToTensor()])
-        test_transforms = Compose([ToTensor()])
     else:
         train_transforms = None
-        val_transforms = None
-        test_transforms = None
+    val_transforms = None
+    test_transforms = None
 
     # dataset
     train_dataset = OPMDDataset(data_csv_path=config["dataset"]["train_csv_path"].replace("x", str(config["fold"])), image_dir=config["dataset"]["train_img_dir"], mask_dir=config["dataset"]["train_mask_dir"], mode="train", transform=train_transforms, n_channels=config["model"]["n_channels"])
