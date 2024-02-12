@@ -6,20 +6,20 @@ from ast import literal_eval
 from PIL import Image, ImageDraw
 
 
-if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD/"): 
-    os.makedirs("/ssd_scratch/cvit/chocolite/OPMD/")
+if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD-GraceSet/"): 
+    os.makedirs("/ssd_scratch/cvit/chocolite/OPMD-GraceSet/")
 
-if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD/images/"): 
-    os.makedirs("/ssd_scratch/cvit/chocolite/OPMD/images/")
+if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD-GraceSet/images/"): 
+    os.makedirs("/ssd_scratch/cvit/chocolite/OPMD-GraceSet/images/")
 
-if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD/masks/"): 
-    os.makedirs("/ssd_scratch/cvit/chocolite/OPMD/masks/")
+if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD-GraceSet/masks/"): 
+    os.makedirs("/ssd_scratch/cvit/chocolite/OPMD-GraceSet/masks/")
 
-if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD/masked_images/"): 
-    os.makedirs("/ssd_scratch/cvit/chocolite/OPMD/masked_images/")
+if not os.path.exists("/ssd_scratch/cvit/chocolite/OPMD-GraceSet/masked_images/"): 
+    os.makedirs("/ssd_scratch/cvit/chocolite/OPMD-GraceSet/masked_images/")
 
 
-df_csv = pd.read_csv("../data/opmd_dataset.csv")[439:]
+df_csv = pd.read_csv("../data/opmd_dataset.csv")[:]
 
 
 # STEP TWO: GENERATE DATASET
@@ -58,6 +58,6 @@ for index, row in df_csv.iterrows():
     masked_image = Image.new("RGB", (512, 512))
     masked_image.paste(image, mask=mask)
 
-    image.save(f"/ssd_scratch/cvit/chocolite/OPMD/images/{row['img_name'].split('.')[0]}.png")
-    mask.save(f"/ssd_scratch/cvit/chocolite/OPMD/masks/{row['img_name'].split('.')[0]}_mask.png")
-    masked_image.save(f"/ssd_scratch/cvit/chocolite/OPMD/masked_images/{row['img_name'].split('.')[0]}_masked.png")
+    image.save(f"/ssd_scratch/cvit/chocolite/OPMD-GraceSet/images/{row['img_name'].split('.')[0]}.png")
+    mask.save(f"/ssd_scratch/cvit/chocolite/OPMD-GraceSet/masks/{row['img_name'].split('.')[0]}_mask.png")
+    masked_image.save(f"/ssd_scratch/cvit/chocolite/OPMD-GraceSet/masked_images/{row['img_name'].split('.')[0]}_masked.png")

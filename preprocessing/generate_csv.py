@@ -6,11 +6,9 @@ from PIL import Image
 import xml.etree.ElementTree as et
 
 
-data_dir = '/ssd_scratch/cvit/chocolite/OPMDData/'
-# sets = [5, 6, 11, 12]
-# setdates = ['20231031', '20231031', '20231125', '20231201']
-sets = [12]
-setdates = ['20231201']
+data_dir = '/ssd_scratch/cvit/chocolite/OPMD-Grace/'
+sets = [5, 6]
+setdates = ['20231031', '20231031']
 
 # STEP ONE: GENERATE CSV
 
@@ -57,5 +55,7 @@ out_df = pd.DataFrame(rows, columns=df_cols)
 
 out_df = out_df.dropna()
 out_df = out_df[(out_df.mask_label == 'Mouth1') | (out_df.mask_label == 'Mouth')]
+
+out_df['subject'] = out_df['img_name'].apply(lambda x: x.split('_')[0])
 
 out_df.to_csv("../data/opmd_dataset.csv", mode='a', index=False)

@@ -49,5 +49,14 @@ class OPMDDataset(Dataset):
 
         image = transforms.ToTensor()(image)
         mask = transforms.ToTensor()(mask)
+
+        print(torch.unique(image), torch.unique(mask))
         
         return image, mask
+    
+
+if __name__ == "__main__":
+    dataset = OPMDDataset()
+    print(len(dataset))
+    print(dataset[0][0].shape, dataset[0][1].shape)
+
